@@ -14,8 +14,6 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static java.util.Collections.emptyMap;
-
 /**
  * This class will contain four utility functions on lists and maps, of which the first one is provided as example.
  * <br>
@@ -118,12 +116,11 @@ public final class LambdaUtilities {
      *         by the supplier
      */
     public static <K, V> Map<K, V> fill(final Map<K, Optional<V>> map, final Supplier<V> def) {
-        /*
-         * Suggestion: consider Optional.orElse
-         *
-         * Keep in mind that a map can be iterated through its forEach method
-         */
-        return emptyMap();
+        final Map<K, V> m = new HashMap<>();
+        map.forEach((key, value) -> {
+            m.put(key, value.orElseGet(def));
+        });
+        return m;
     }
 
     /**
