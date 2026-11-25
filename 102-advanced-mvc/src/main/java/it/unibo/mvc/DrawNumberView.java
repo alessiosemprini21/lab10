@@ -28,4 +28,11 @@ public interface DrawNumberView {
      * @param res the result of the last draw
      */
     void result(DrawResult res);
+
+    /**
+     * display if there is an error
+     * 
+     * @param message the error message
+     */
+    void displayError(String message);
 }

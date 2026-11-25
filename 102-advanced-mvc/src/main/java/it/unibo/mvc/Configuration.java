@@ -1,5 +1,11 @@
 package it.unibo.mvc;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.StringTokenizer;
+
 /**
  * Encapsulates the concept of configuration.
  */
@@ -49,6 +55,43 @@ public final class Configuration {
      */
     public boolean isConsistent() {
         return attempts > 0 && min < max;
+    }
+
+    /**
+     * Reads the configuration from the given resource.
+     * 
+     * @param resource name of the classpath resource
+     * @return Configuration
+     * @throws IOException if the resource cannot be found or read
+     */
+    public static Configuration fromResource(final String resource) throws IOException {
+        final InputStream in = ClassLoader.getSystemResourceAsStream(resource);
+        if (in == null) {
+            throw new IOException("Error while reading the file " + resource);
+        }
+        try (final BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+            final var builder = new Configuration.Builder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                final var tokenizer = new StringTokenizer(line, ":");
+                if (tokenizer.countTokens() == 2) {
+                    final String key = tokenizer.nextToken();
+                    final int value = Integer.parseInt(tokenizer.nextToken().trim());
+                    if (key.equals("minimum")) {
+                        builder.withMin(value);
+                    } else if (key.equals("maximum")) {
+                        builder.withMax(value);
+                    } else if (key.equals("attempts")) {
+                        builder.withAttempts(value);
+                    }
+                }
+            }
+            final Configuration config = builder.build();
+            if (!config.isConsistent()) {
+                throw new IllegalStateException("Inconsistent configuration");
+            }
+            return config;
+        }
     }
 
     /**

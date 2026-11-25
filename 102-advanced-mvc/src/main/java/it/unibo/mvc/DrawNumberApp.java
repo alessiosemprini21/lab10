@@ -3,6 +3,7 @@ package it.unibo.mvc;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -10,9 +11,6 @@ import java.util.List;
  * Application entry point for DrawNumber game.
  */
 public final class DrawNumberApp implements DrawNumberViewObserver {
-    private static final int MIN = 0;
-    private static final int MAX = 100;
-    private static final int ATTEMPTS = 10;
 
     private final DrawNumber model;
     private final List<DrawNumberView> views;
@@ -32,7 +30,16 @@ public final class DrawNumberApp implements DrawNumberViewObserver {
             view.setObserver(this);
             view.start();
         }
-        this.model = new DrawNumberImpl(MIN, MAX, ATTEMPTS);
+        Configuration config;
+        try {
+            config = Configuration.fromResource("config.yml");
+        } catch (final IOException | IllegalStateException e) {
+            for (final DrawNumberView view: this.views) {
+                view.displayError(e.getMessage());
+            }
+            config = new Configuration.Builder().build();
+        }
+        this.model = new DrawNumberImpl(config.getMin(), config.getMax(), config.getAttempts());
     }
 
     @Override
@@ -75,7 +82,10 @@ public final class DrawNumberApp implements DrawNumberViewObserver {
      * @throws FileNotFoundException if the configuration file cannot be fetched
      */
     public static void main() throws FileNotFoundException {
-        new DrawNumberApp(new DrawNumberViewImpl());
+        new DrawNumberApp(new DrawNumberViewImpl(), 
+                            new DrawNumberViewImpl(), 
+                            new PrintStreamView("log.txt"), 
+                            new PrintStreamView(System.out));
     }
 
 }
