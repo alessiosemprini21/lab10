@@ -1,5 +1,6 @@
 package it.unibo.oop.lab.streams;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
@@ -7,6 +8,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -32,42 +34,66 @@ public final class MusicGroupImpl implements MusicGroup {
 
     @Override
     public Stream<String> orderedSongNames() {
-        return null;
+        return songs.stream()
+                    .map(s -> s.getSongName())
+                    .sorted();
     }
 
     @Override
     public Stream<String> albumNames() {
-        return null;
+        return albums.keySet().stream();
     }
 
     @Override
     public Stream<String> albumInYear(final int year) {
-        return null;
+        return albums.entrySet().stream()
+                                .filter(e -> e.getValue() == year)
+                                .map(e -> e.getKey());
     }
 
     @Override
     public int countSongs(final String albumName) {
-        return -1;
+        return (int) songs.stream()
+                            .filter(s -> s.getAlbumName().equals(Optional.of(albumName)))
+                            .count();
     }
 
     @Override
     public int countSongsInNoAlbum() {
-        return -1;
+        return (int) songs.stream()
+                            .filter(s -> s.getAlbumName()
+                            .equals(Optional.empty()))
+                            .count();
     }
 
     @Override
     public OptionalDouble averageDurationOfSongs(final String albumName) {
-        return OptionalDouble.empty();
+        return songs.stream()
+                    .filter(s -> s.getAlbumName().equals(Optional.of(albumName)))
+                    .mapToDouble(s -> s.getDuration())
+                    .average();
     }
 
     @Override
     public Optional<String> longestSong() {
-        return Optional.empty();
+        return songs.stream()
+                    .max((a, b) -> Double.compare(a.getDuration(), b.getDuration()))
+                    .map(s -> s.getSongName());
     }
 
     @Override
     public Optional<String> longestAlbum() {
-        return Optional.empty();
+        return songs.stream()
+                    .filter(s -> s.getAlbumName().isPresent())
+                    .collect(Collectors.toMap(
+                                            s -> s.getAlbumName().get(),
+                                            s -> s.getDuration(),
+                                            (x, y) -> x + y
+                        ))
+                    .entrySet()
+                    .stream()
+                    .max((a, b) -> Double.compare(a.getValue(), b.getValue()))
+                    .map(e -> e.getKey());
     }
 
     private static final class Song {
