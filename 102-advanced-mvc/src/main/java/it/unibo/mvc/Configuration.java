@@ -61,8 +61,9 @@ public final class Configuration {
      * Reads the configuration from the given resource.
      * 
      * @param resource name of the classpath resource
-     * @return Configuration
+     * @return the configuration read from the resource
      * @throws IOException if the resource cannot be found or read
+     * @throws IllegalStateException if the configuration is not consistent
      */
     public static Configuration fromResource(final String resource) throws IOException {
         final InputStream in = ClassLoader.getSystemResourceAsStream(resource);
@@ -75,7 +76,7 @@ public final class Configuration {
             while ((line = reader.readLine()) != null) {
                 final var tokenizer = new StringTokenizer(line, ":");
                 if (tokenizer.countTokens() == 2) {
-                    final String key = tokenizer.nextToken();
+                    final String key = tokenizer.nextToken().trim();
                     final int value = Integer.parseInt(tokenizer.nextToken().trim());
                     if (key.equals("minimum")) {
                         builder.withMin(value);

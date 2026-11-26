@@ -33,7 +33,7 @@ public final class DrawNumberApp implements DrawNumberViewObserver {
         Configuration config;
         try {
             config = Configuration.fromResource("config.yml");
-        } catch (final IOException | IllegalStateException e) {
+        } catch (final IOException | IllegalStateException | NumberFormatException e) {
             for (final DrawNumberView view: this.views) {
                 view.displayError(e.getMessage());
             }
@@ -79,11 +79,11 @@ public final class DrawNumberApp implements DrawNumberViewObserver {
     /**
      * Application entry point.
      *
-     * @throws FileNotFoundException if the configuration file cannot be fetched
+     * @throws FileNotFoundException if the log.txt file cannot be created
      */
     public static void main() throws FileNotFoundException {
-        new DrawNumberApp(new DrawNumberViewImpl(), 
-                            new DrawNumberViewImpl(), 
+        new DrawNumberApp(new DrawNumberViewImpl(),
+                            new DrawNumberViewImpl(),
                             new PrintStreamView("log.txt"), 
                             new PrintStreamView(System.out));
     }
